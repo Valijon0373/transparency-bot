@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Telegram Bot (UZ/RU/EN) + Express Backend + React Tailwind Dashboard",
   "scripts": {
+    "dev": "npx concurrently \"npm run backend\" \"npm run dashboard\"",
     "setup": "npm install --prefix backend && npm install --prefix dashboard && npm run seed --prefix backend",
     "backend": "npm run dev --prefix backend",
     "dashboard": "npm run dev --prefix dashboard",
