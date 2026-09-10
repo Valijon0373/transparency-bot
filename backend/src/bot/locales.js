@@ -1,0 +1,76 @@
+export const locales = {
+  uz: {
+    welcome: "Assalomu alaykum! Shaffoflik va murojaatlar botiga xush kelibsiz.\n\nIltimos, kerakli bo'limni tanlang:",
+    btn_start_appeal: "🔒 Anonim murojaat yuborish",
+    btn_change_lang: "🌐 Tilni o'zgartirish",
+    ask_phone: "📱 Telefon raqamingizni yuboring (pastdagi tugma orqali):",
+    btn_send_phone: "📱 Telefon raqamni yuborish",
+    btn_anonymous_phone: "👤 Telefon raqamsiz yuborish",
+    ask_category: "❓ Qanday Murojaat Yubormoqchisiz?",
+    cat_corruption: "🚨 Korrupsion Holat",
+    cat_system: "⚙️ Tizim muammosi",
+    ask_text: "✍️ Murojaat matnini yozing:",
+    confirm_title: "📋 Murojaatingiz ma'lumotlari:\n\n",
+    confirm_ask: "\nMurojaatingizni to'g'ri ekanligini tasdiqlaysizmi?",
+    btn_confirm_yes: "✅ Tasdiqlayman",
+    btn_confirm_no: "❌ Bekor qilish",
+    ask_photo: "📎 Rasm yuboring (ixtiyoriy) yoki “O‘tkazib yuborish”ni bosing.",
+    btn_skip_photo: "⏭ O‘tkazib yuborish",
+    success: "✅ Murojaatingiz qabul qilindi!!!\n\n🆔 Murojaat raqami: ",
+    cancel_msg: "❌ Murojaat bekor qilindi. Qayta boshlash uchun /start bosing.",
+    status_updated: "🔔 **Murojaatingiz holati o'zgardi!**\n\n🆔 Raqam: ",
+    status_label: "Ariza holati:",
+    admin_reply_received: "💬 **Murojaatingiz bo'yicha javob xati:**\n\n🆔 Raqam: "
+  },
+  ru: {
+    welcome: "Здравствуйте! Добро пожаловать в бот прозрачности и обращений.\n\nПожалуйста, выберите раздел:",
+    btn_start_appeal: "🔒 Отправить анонимное обращение",
+    btn_change_lang: "🌐 Изменить язык",
+    ask_phone: "📱 Отправьте ваш номер телефона (с помощью кнопки ниже):",
+    btn_send_phone: "📱 Отправить номер телефона",
+    btn_anonymous_phone: "👤 Отправить без номера",
+    ask_category: "❓ Какое обращение вы хотите отправить?",
+    cat_corruption: "🚨 Коррупция",
+    cat_system: "⚙️ Системная проблема",
+    ask_text: "✍️ Напишите текст обращения:",
+    confirm_title: "📋 Данные вашего обращения:\n\n",
+    confirm_ask: "\nВы подтверждаете правильность вашего обращения?",
+    btn_confirm_yes: "✅ Подтверждаю",
+    btn_confirm_no: "❌ Отмена",
+    ask_photo: "📎 Отправьте фото (необязательно) или нажмите «Пропустить».",
+    btn_skip_photo: "⏭ Пропустить",
+    success: "✅ Ваше обращение принято!!!\n\n🆔 Номер обращения: ",
+    cancel_msg: "❌ Обращение отменено. Нажмите /start, чтобы начать заново.",
+    status_updated: "🔔 **Статус вашего обращения изменен!**\n\n🆔 Номер: ",
+    status_label: "Статус обращения:",
+    admin_reply_received: "💬 **Ответ на ваше обращение:**\n\n🆔 Номер: "
+  },
+  en: {
+    welcome: "Hello! Welcome to the Transparency & Appeals Bot.\n\nPlease select an option:",
+    btn_start_appeal: "🔒 Send anonymous appeal",
+    btn_change_lang: "🌐 Change language",
+    ask_phone: "📱 Please send your phone number (using the button below):",
+    btn_send_phone: "📱 Send phone number",
+    btn_anonymous_phone: "👤 Submit without phone",
+    ask_category: "❓ What kind of appeal would you like to submit?",
+    cat_corruption: "🚨 Corruption Case",
+    cat_system: "⚙️ System Issue",
+    ask_text: "✍️ Write your appeal text:",
+    confirm_title: "📋 Summary of your appeal:\n\n",
+    confirm_ask: "\nDo you confirm that your appeal details are correct?",
+    btn_confirm_yes: "✅ Confirm",
+    btn_confirm_no: "❌ Cancel",
+    ask_photo: "📎 Send a photo (optional) or click “Skip”.",
+    btn_skip_photo: "⏭ Skip",
+    success: "✅ Your appeal has been received!!!\n\n🆔 Appeal ID: ",
+    cancel_msg: "❌ Appeal cancelled. Press /start to try again.",
+    status_updated: "🔔 **Status of your appeal updated!**\n\n🆔 ID: ",
+    status_label: "Appeal status:",
+    admin_reply_received: "💬 **Reply to your appeal:**\n\n🆔 ID: "
+  }
+};
+
+export const getLangText = (lang, key) => {
+  const selectedLang = locales[lang] ? lang : 'uz';
+  return locales[selectedLang][key] || locales['uz'][key] || key;
+};
