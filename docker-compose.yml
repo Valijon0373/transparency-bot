@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: transparency_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-transparency_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transparency_pass_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-transparency_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-transparency_user} -d ${POSTGRES_DB:-transparency_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transparency_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT:-5000}
+      DB_TYPE: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-transparency_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transparency_pass_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-transparency_db}
+      JWT_SECRET: ${JWT_SECRET:-transparency_secret_jwt_key_2026_key}
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-urspi2026!}
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads_data:/app/uploads
+      - backend_data:/app/data
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: transparency_dashboard
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:
+  uploads_data:
+  backend_data:
