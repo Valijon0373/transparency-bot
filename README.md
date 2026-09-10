@@ -1,1 +1,1 @@
-# 🛡️ Telegram Anonim Murojaatlar Boti & Admin Boshqaruv Paneli (Dashboard)
+# 🛡️ Telegram Anonim Murojaatlar Boti & Admin Boshqaruv Paneli
