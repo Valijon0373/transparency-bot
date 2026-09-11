@@ -221,19 +221,26 @@ export default function AppealDetailModal({ appeal, onClose, onUpdateStatus, onS
               </div>
               <div className="text-sm font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <HiOutlinePhone className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                <span>{appeal.phone_number || 'Anonim'}</span>
+                <span>{appeal.phone_number || '-'}</span>
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
+              <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-1 pt-0.5">
                 {appeal.is_anonymous ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60 w-fit">
                     <HiOutlineUserMinus className="w-3 h-3" />
                     Anonim murojaat
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                    <HiOutlineUser className="w-3.5 h-3.5 text-slate-400" />
-                    @{appeal.username || appeal.first_name || 'yo\'q'}
-                  </span>
+                  <>
+                    <span className="inline-flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                      <HiOutlineUser className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                      <span>{appeal.full_name || appeal.first_name || 'Noma\'lum'}</span>
+                    </span>
+                    {appeal.username && (
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        @{appeal.username}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>

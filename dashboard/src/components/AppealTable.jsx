@@ -213,7 +213,7 @@ export default function AppealTable({
                   <td className="px-5 py-4 whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                     <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                       <HiOutlinePhone className="w-3.5 h-3.5 text-teal-500" />
-                      {appeal.phone_number || 'Anonim'}
+                      {appeal.phone_number || '-'}
                     </div>
                     <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                       {appeal.is_anonymous ? (
@@ -224,7 +224,7 @@ export default function AppealTable({
                       ) : (
                         <>
                           <HiOutlineUser className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{appeal.first_name || 'Foydalanuvchi'} {appeal.username ? `@${appeal.username}` : ''}</span>
+                          <span>{appeal.full_name || appeal.first_name || 'Foydalanuvchi'} {appeal.username ? `(@${appeal.username})` : ''}</span>
                         </>
                       )}
                     </div>

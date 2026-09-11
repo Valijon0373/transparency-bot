@@ -32,9 +32,9 @@ router.get('/', verifyToken, async (req, res) => {
     }
 
     if (search) {
-      sql += ' AND (tracking_id LIKE ? OR phone_number LIKE ? OR text LIKE ? OR username LIKE ? OR first_name LIKE ?)';
+      sql += ' AND (tracking_id LIKE ? OR phone_number LIKE ? OR text LIKE ? OR username LIKE ? OR first_name LIKE ? OR full_name LIKE ?)';
       const term = `%${search}%`;
-      params.push(term, term, term, term, term);
+      params.push(term, term, term, term, term, term);
     }
 
     sql += ' ORDER BY created_at DESC';

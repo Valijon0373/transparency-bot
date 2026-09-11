@@ -107,6 +107,7 @@ export const initDb = async () => {
         telegram_id VARCHAR(255) NOT NULL,
         username VARCHAR(255),
         first_name VARCHAR(255),
+        full_name VARCHAR(255),
         phone_number VARCHAR(255),
         is_anonymous INTEGER DEFAULT 0,
         language VARCHAR(50) DEFAULT 'uz',
@@ -147,6 +148,7 @@ export const initDb = async () => {
         telegram_id TEXT NOT NULL,
         username TEXT,
         first_name TEXT,
+        full_name TEXT,
         phone_number TEXT,
         is_anonymous INTEGER DEFAULT 0,
         language TEXT DEFAULT 'uz',
@@ -172,6 +174,17 @@ export const initDb = async () => {
         FOREIGN KEY (appeal_id) REFERENCES appeals(id) ON DELETE CASCADE
       )
     `);
+  }
+
+  // Ensure full_name column exists for existing databases
+  try {
+    if (isPostgres) {
+      await pgPool.query(`ALTER TABLE appeals ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);`);
+    } else {
+      await run(`ALTER TABLE appeals ADD COLUMN full_name TEXT;`);
+    }
+  } catch (err) {
+    // Column may already exist, ignore error
   }
 
   // Sync admin credentials from .env

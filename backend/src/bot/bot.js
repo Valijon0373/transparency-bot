@@ -125,29 +125,33 @@ export const initBot = (token) => {
     if (text === getLangText('uz', 'btn_start_appeal') || 
         text === getLangText('ru', 'btn_start_appeal') || 
         text === getLangText('en', 'btn_start_appeal') ||
-        text.includes('Anonim murojaat') || text.includes('анонимное') || text.includes('anonymous')) {
+        text.includes('Murojaat yuborish') || text.includes('Отправить обращение') || text.includes('Send appeal')) {
       
-      session.step = 'AWAITING_PHONE';
-      session.data = { is_anonymous: 1 };
+      session.step = 'AWAITING_FULL_NAME';
+      session.data = { is_anonymous: 0 };
 
       return ctx.reply(
-        getLangText(lang, 'ask_phone'),
-        Markup.keyboard([
-          [Markup.button.contactRequest(getLangText(lang, 'btn_send_phone'))],
-          [getLangText(lang, 'btn_anonymous_phone')]
-        ]).resize()
+        getLangText(lang, 'ask_full_name'),
+        Markup.removeKeyboard()
       );
     }
 
     // Step handling
+    if (session.step === 'AWAITING_FULL_NAME') {
+      session.data.full_name = text;
+      session.step = 'AWAITING_PHONE';
+
+      return ctx.reply(
+        getLangText(lang, 'ask_phone'),
+        Markup.keyboard([
+          [Markup.button.contactRequest(getLangText(lang, 'btn_send_phone'))]
+        ]).resize()
+      );
+    }
+
     if (session.step === 'AWAITING_PHONE') {
-      if (text === getLangText(lang, 'btn_anonymous_phone') || text.includes('без') || text.includes('without') || text.includes('raqamsiz')) {
-        session.data.phone_number = "Anonim (Kiritilmadi)";
-        session.data.is_anonymous = 1;
-      } else {
-        session.data.phone_number = text;
-        session.data.is_anonymous = 0;
-      }
+      session.data.phone_number = text;
+      session.data.is_anonymous = 0;
 
       session.step = 'AWAITING_CATEGORY';
       return ctx.reply(
@@ -181,6 +185,7 @@ export const initBot = (token) => {
 
       const summary = 
         `${getLangText(lang, 'confirm_title')}` +
+        `👤 **F.I.SH:** ${session.data.full_name}\n` +
         `📌 **Kategoriya:** ${session.data.category}\n` +
         `📞 **Telefon:** ${session.data.phone_number}\n` +
         `✍️ **Matn:** ${session.data.text}\n` +
@@ -271,15 +276,16 @@ export const initBot = (token) => {
     try {
       await run(
         `INSERT INTO appeals 
-         (tracking_id, telegram_id, username, first_name, phone_number, is_anonymous, language, category, category_key, text, photo_path, telegram_photo_id) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (tracking_id, telegram_id, username, first_name, full_name, phone_number, is_anonymous, language, category, category_key, text, photo_path, telegram_photo_id) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           trackingId,
           telegramId,
           username,
-          firstName,
-          session.data.phone_number || 'Anonim',
-          session.data.is_anonymous || 1,
+          session.data.full_name || firstName || '',
+          session.data.full_name || firstName || '',
+          session.data.phone_number || '',
+          0,
           lang,
           session.data.category,
           session.data.category_key,
