@@ -99,6 +99,10 @@ export default function App() {
   useEffect(() => {
     if (isLoggedIn) {
       fetchData();
+      const interval = setInterval(() => {
+        fetchData();
+      }, 30000);
+      return () => clearInterval(interval);
     }
   }, [isLoggedIn, fetchData]);
 
@@ -196,6 +200,7 @@ export default function App() {
 
   const corruptionCount = stats?.byCategory?.find(c => c.category_key === 'corruption')?.count || 0;
   const systemCount = stats?.byCategory?.find(c => c.category_key === 'system')?.count || 0;
+  const newCount = stats?.byStatus?.find(s => s.status === 'Yangi')?.count ?? (appeals ? appeals.filter(a => a.status === 'Yangi').length : 0);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors font-['Plus_Jakarta_Sans',sans-serif]">
@@ -207,7 +212,8 @@ export default function App() {
         counts={{
           total: stats?.total || 0,
           corruption: corruptionCount,
-          system: systemCount
+          system: systemCount,
+          newAppeals: newCount
         }}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -227,6 +233,7 @@ export default function App() {
           setSearchTerm={setSearchTerm}
           isDarkMode={isDarkMode}
           toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          newAppealsCount={newCount}
         />
 
         {/* Dynamic Body Content */}

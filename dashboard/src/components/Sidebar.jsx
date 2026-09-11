@@ -77,9 +77,17 @@ export default function Sidebar({
               <HiOutlineShieldCheck className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight leading-tight">
-                UrSPI Admin
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-extrabold text-sm text-slate-800 dark:text-white tracking-tight leading-tight">
+                  UrSPI Admin
+                </h1>
+                {counts?.newAppeals > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white shadow-sm shadow-rose-600/40 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+                    Yangi ({counts.newAppeals})
+                  </span>
+                )}
+              </div>
               <p className="text-[11px] text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
                 <span>Shaffoflik Portali</span>
               </p>
@@ -99,6 +107,8 @@ export default function Sidebar({
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+            const isAppealsTab = item.id === 'appeals';
+            const hasNewAppeals = isAppealsTab && counts?.newAppeals > 0;
 
             return (
               <button
@@ -120,7 +130,12 @@ export default function Sidebar({
                   <span>{item.label}</span>
                 </div>
 
-                {item.badge !== null && item.badge !== undefined && (
+                {hasNewAppeals ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white shadow-sm shadow-rose-600/40 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 animate-ping" />
+                    Yangi ({counts.newAppeals})
+                  </span>
+                ) : item.badge !== null && item.badge !== undefined ? (
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                     isActive 
                       ? 'bg-white/20 text-white' 
@@ -128,7 +143,7 @@ export default function Sidebar({
                   }`}>
                     {item.badge}
                   </span>
-                )}
+                ) : null}
               </button>
             );
           })}

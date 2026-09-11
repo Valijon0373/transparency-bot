@@ -29,10 +29,10 @@ export default function AppealDetailModal({ appeal, onClose, onUpdateStatus, onS
   const [adminNotes, setAdminNotes] = useState(appeal.admin_notes || '');
   const [replyMessage, setReplyMessage] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [copiedId, setCopiedId] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [statusError, setStatusError] = useState(false);
 
   const formatDate = (isoString) => {
     if (!isoString) return '';
@@ -65,32 +65,37 @@ export default function AppealDetailModal({ appeal, onClose, onUpdateStatus, onS
     }
   };
 
-  const handleStatusSubmit = async (e) => {
-    e.preventDefault();
-    setUpdatingStatus(true);
-    setFeedback(null);
-    try {
-      await onUpdateStatus(appeal.id, status, adminNotes);
-      setFeedback({ type: 'success', text: "Ariza holati muvaffaqiyatli o'zgartirildi" });
-    } catch (err) {
-      setFeedback({ type: 'error', text: err.message || "Holatni o'zgartirishda xatolik yuz berdi" });
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
   const handleReplySubmit = async (e) => {
     e.preventDefault();
+    setStatusError(false);
+
     if (!replyMessage.trim()) return;
+
+    // Status change is mandatory when replying (must not stay 'Yangi')
+    if (status === 'Yangi') {
+      setStatusError(true);
+      setFeedback({ 
+        type: 'error', 
+        text: "Javob xati yozilganda murojaat holatini o'zgartirish majburiy! Iltimos, yangi holatni tanlang (Jarayonda, Bajarildi yoki Rad etildi)." 
+      });
+      return;
+    }
+
     setSendingReply(true);
     setFeedback(null);
     try {
-      const res = await onSendReply(appeal.id, replyMessage);
+      await onUpdateStatus(appeal.id, status, adminNotes);
+      await onSendReply(appeal.id, replyMessage);
       setReplyMessage('');
       setFeedback({ 
         type: 'success', 
-        text: "Muvaffaqiyatli jo'natildi" 
+        text: "Javob xati fuqaroga yuborildi va murojaat holati yangilandi!" 
       });
+
+      // Show feedback notification briefly, then automatically close modal
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
       setFeedback({ type: 'error', text: err.message || "Javob yuborishda xatolik yuz berdi" });
     } finally {
@@ -331,136 +336,122 @@ export default function AppealDetailModal({ appeal, onClose, onUpdateStatus, onS
             </div>
           )}
 
-          {/* Two-Column Action Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            
-            {/* Form 1: Status & Admin Notes */}
-            <form 
-              onSubmit={handleStatusSubmit} 
-              className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800/90 space-y-4 shadow-sm flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <h3 className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-200 tracking-wider flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-                    <HiOutlineShieldCheck className="w-4 h-4" />
-                  </div>
-                  <span>Holatni O'zgartirish</span>
-                </h3>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
-                    Murojaat Holati
-                  </label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all shadow-sm"
-                  >
-                    <option value="Yangi">🔵 Yangi (Ko'rilmagan)</option>
-                    <option value="Jarayonda">🟡 Jarayonda (O'rganilmoqda)</option>
-                    <option value="Bajarildi">🟢 Bajarildi (Hal etildi)</option>
-                    <option value="Rad etildi">🔴 Rad etildi</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
-                    Ichki Izoh (Admin xodimlari uchun)
-                  </label>
-                  <textarea
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    rows="3"
-                    placeholder="Ichki ko'rib chiqish bo'yicha qisqacha izoh yozing..."
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all placeholder-slate-400 shadow-inner"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={updatingStatus}
-                className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-extrabold text-xs transition-all shadow-md hover:shadow-teal-500/25 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {updatingStatus ? (
-                  <>
-                    <HiOutlineArrowPath className="w-4 h-4 animate-spin" />
-                    <span>Saqlanmoqda...</span>
-                  </>
-                ) : (
-                  <>
-                    <HiOutlineCheckCircle className="w-4 h-4" />
-                    <span>Holatni Saqlash</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Form 2: Direct Reply to Telegram */}
-            <form 
-              onSubmit={handleReplySubmit} 
-              className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800/90 space-y-4 shadow-sm flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <h3 className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-200 tracking-wider flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                    <TbBrandTelegram className="w-4 h-4" />
-                  </div>
-                  <span>Telegram'ga Javob Yuborish</span>
-                </h3>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
-                    Javob Xati (Fuqaroga Telegram orqali yuboriladi)
-                  </label>
-                  <textarea
-                    value={replyMessage}
-                    onChange={(e) => setReplyMessage(e.target.value)}
-                    rows="3"
-                    placeholder="Fuqaroga rasmiy javob yoki ko'rib chiqish natijasini yozing..."
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all placeholder-slate-400 shadow-inner"
-                  />
-                </div>
-
-                {/* History of Replies */}
-                {appeal.replies && appeal.replies.length > 0 && (
-                  <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold">
-                      Yuborilgan Javoblar Tarixi:
+          {/* Combined Action Grid */}
+          <form onSubmit={handleReplySubmit} className="pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Card 1: Status & Admin Notes */}
+              <div className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800/90 space-y-4 shadow-sm flex flex-col justify-between">
+                <div className="space-y-4">
+                  <h3 className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-200 tracking-wider flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <div className="w-6 h-6 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                      <HiOutlineShieldCheck className="w-4 h-4" />
                     </div>
-                    {appeal.replies.map((rep) => (
-                      <div key={rep.id} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-1 shadow-sm">
-                        <div className="flex justify-between text-[10px] text-slate-400 font-bold">
-                          <span className="text-sky-600 dark:text-sky-400">@{rep.admin_username || 'admin'}</span>
-                          <span>{new Date(rep.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                        <p className="text-slate-700 dark:text-slate-300 text-xs">{rep.message}</p>
-                      </div>
-                    ))}
+                    <span>Holatni O'zgartirish</span>
+                  </h3>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5 flex justify-between items-center">
+                      <span>Murojaat Holati <span className="text-rose-500 font-extrabold">* (Majburiy)</span></span>
+                      {statusError && <span className="text-rose-500 text-[11px] font-bold">Yangi holatni tanlang!</span>}
+                    </label>
+                    <select
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        if (e.target.value !== 'Yangi') setStatusError(false);
+                      }}
+                      className={`w-full bg-white dark:bg-slate-900 border ${
+                        statusError 
+                          ? 'border-rose-500 ring-2 ring-rose-500/20 text-rose-600 dark:text-rose-400' 
+                          : 'border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100'
+                      } text-xs font-bold rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all shadow-sm`}
+                    >
+                      <option value="Yangi">🔵 Yangi (Ko'rilmagan)</option>
+                      <option value="Jarayonda">🟡 Jarayonda (O'rganilmoqda)</option>
+                      <option value="Bajarildi">🟢 Bajarildi (Hal etildi)</option>
+                      <option value="Rad etildi">🔴 Rad etildi</option>
+                    </select>
                   </div>
-                )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+                      Ichki Izoh (Admin xodimlari uchun)
+                    </label>
+                    <textarea
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      rows="3"
+                      placeholder="Ichki ko'rib chiqish bo'yicha qisqacha izoh yozing..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all placeholder-slate-400 shadow-inner"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={sendingReply || !replyMessage.trim()}
-                className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-extrabold text-xs transition-all shadow-md hover:shadow-sky-500/25 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
-              >
-                {sendingReply ? (
-                  <>
-                    <HiOutlineArrowPath className="w-4 h-4 animate-spin" />
-                    <span>Yuborilmoqda...</span>
-                  </>
-                ) : (
-                  <>
-                    <HiOutlinePaperAirplane className="w-4 h-4 rotate-45" />
-                    <span>Telegram'ga Yuborish</span>
-                  </>
-                )}
-              </button>
-            </form>
+              {/* Card 2: Direct Reply to Telegram */}
+              <div className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800/90 space-y-4 shadow-sm flex flex-col justify-between">
+                <div className="space-y-4">
+                  <h3 className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-200 tracking-wider flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <div className="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                      <TbBrandTelegram className="w-4 h-4" />
+                    </div>
+                    <span>Telegram'ga Javob Yuborish</span>
+                  </h3>
 
-          </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+                      Javob Xati (Fuqaroga Telegram orqali yuboriladi) <span className="text-rose-500 font-extrabold">*</span>
+                    </label>
+                    <textarea
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                      rows="3"
+                      placeholder="Fuqaroga rasmiy javob yoki ko'rib chiqish natijasini yozing..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all placeholder-slate-400 shadow-inner"
+                    />
+                  </div>
+
+                  {/* History of Replies */}
+                  {appeal.replies && appeal.replies.length > 0 && (
+                    <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                      <div className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold">
+                        Yuborilgan Javoblar Tarixi:
+                      </div>
+                      {appeal.replies.map((rep) => (
+                        <div key={rep.id} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-1 shadow-sm">
+                          <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+                            <span className="text-sky-600 dark:text-sky-400">@{rep.admin_username || 'admin'}</span>
+                            <span>{new Date(rep.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <p className="text-slate-700 dark:text-slate-300 text-xs">{rep.message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={sendingReply || !replyMessage.trim()}
+                  className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-extrabold text-xs transition-all shadow-md hover:shadow-sky-500/25 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {sendingReply ? (
+                    <>
+                      <HiOutlineArrowPath className="w-4 h-4 animate-spin" />
+                      <span>Yuborilmoqda va Saqlanmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <HiOutlinePaperAirplane className="w-4 h-4 rotate-45" />
+                      <span>Telegram'ga Yuborish</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </div>
+          </form>
 
         </div>
 

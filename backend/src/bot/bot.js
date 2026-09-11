@@ -98,7 +98,7 @@ export const initBot = (token) => {
             resolve(`/uploads/${filename}`);
           });
         }).on('error', (err) => {
-          fs.unlink(localPath, () => {});
+          fs.unlink(localPath, () => { });
           reject(err);
         });
       });
@@ -115,18 +115,18 @@ export const initBot = (token) => {
     const lang = session.lang;
 
     // Check menu buttons
-    if (text === getLangText('uz', 'btn_change_lang') || 
-        text === getLangText('ru', 'btn_change_lang') || 
-        text === getLangText('en', 'btn_change_lang') ||
-        text === '🌐 Tilni o\'zgartirish') {
+    if (text === getLangText('uz', 'btn_change_lang') ||
+      text === getLangText('ru', 'btn_change_lang') ||
+      text === getLangText('en', 'btn_change_lang') ||
+      text === '🌐 Tilni o\'zgartirish') {
       return sendLangSelect(ctx);
     }
 
-    if (text === getLangText('uz', 'btn_start_appeal') || 
-        text === getLangText('ru', 'btn_start_appeal') || 
-        text === getLangText('en', 'btn_start_appeal') ||
-        text.includes('Murojaat yuborish') || text.includes('Отправить обращение') || text.includes('Send appeal')) {
-      
+    if (text === getLangText('uz', 'btn_start_appeal') ||
+      text === getLangText('ru', 'btn_start_appeal') ||
+      text === getLangText('en', 'btn_start_appeal') ||
+      text.includes('Murojaat yuborish') || text.includes('Отправить обращение') || text.includes('Send appeal')) {
+
       session.step = 'AWAITING_FULL_NAME';
       session.data = { is_anonymous: 0 };
 
@@ -183,7 +183,7 @@ export const initBot = (token) => {
       session.data.text = text;
       session.step = 'AWAITING_CONFIRMATION';
 
-      const summary = 
+      const summary =
         `${getLangText(lang, 'confirm_title')}` +
         `👤 **F.I.SH:** ${session.data.full_name}\n` +
         `📌 **Kategoriya:** ${session.data.category}\n` +
@@ -257,7 +257,7 @@ export const initBot = (token) => {
     if (session.step === 'AWAITING_PHOTO') {
       const photos = ctx.message.photo;
       const largestPhoto = photos[photos.length - 1]; // highest resolution photo
-      
+
       await ctx.reply("⏳ Rasm yuklanmoqda...");
       const photoPath = await downloadTelegramPhoto(bot, largestPhoto.file_id);
 

@@ -19,7 +19,8 @@ export default function Navbar({
   searchTerm, 
   setSearchTerm,
   isDarkMode,
-  toggleDarkMode
+  toggleDarkMode,
+  newAppealsCount = 0
 }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -54,8 +55,14 @@ export default function Navbar({
           <HiBars3 className="w-5 h-5" />
         </button>
 
-        <h1 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+        <h1 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2.5">
           <span>{getTitle()}</span>
+          {newAppealsCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-600 text-white shadow-sm shadow-rose-600/40 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-white shrink-0 animate-ping" />
+              Yangi ({newAppealsCount})
+            </span>
+          )}
         </h1>
       </div>
 
